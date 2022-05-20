@@ -84,7 +84,9 @@ with contrast & brightness properties
 of a photo.In order to get an optimal 
 improvement of a photo we have done 
 the following calculations and implemented them in our code:
+
 ![image](https://user-images.githubusercontent.com/105777016/169496745-486ac58e-dfbb-459e-b3a3-49f60dca2964.png)
+
 The mechanism of this algorithm works like this in a nutshell:
 First we made an assumption that some higher values than PIXEL_MinVal and some have lower values than PIXEL_MaxVal.
 Then we find Min&Max Pixel values and after that calculate the 
