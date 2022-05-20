@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <conio.h>
+#include <iostream>
+#include <fstream>
+
+/*Roy Ben Avraham, 2021*/
+
+using namespace std;
+
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+// BMP Library
+#include "ImProcInPlainC.h"
+#define PIXEL_VALUES (255)
+#define PIXEL_MINVAL (0)
+#define PIXEL_MAXVAL (255)
+
+//Declare Gray Image
+unsigned char GrayImage[NUMBER_OF_ROWS][NUMBER_OF_COLUMNS];
+unsigned char LUT[PIXEL_VALUES];
+
+void Create_LUT(unsigned char LUT[], double c, double b)
+{
+	for (unsigned i = 0; i <= PIXEL_MAXVAL; i++)
+	{
+		double val = c * i + b;
+		if (val > PIXEL_MAXVAL)
+			LUT[i] = PIXEL_MAXVAL;
+		else if (val < PIXEL_MINVAL)
+			LUT[i] = PIXEL_MINVAL;
+		else
+			LUT[i] = val;
+	}
+}
+
+void ApplyLUTonGrayImage(unsigned char img[][NUMBER_OF_COLUMNS], unsigned char LUT[])
+{
+	unsigned char* image = img[0];
+	for (int row = 0; row <= NUMBER_OF_ROWS; row++)
+		for (int col = 0; col <= NUMBER_OF_COLUMNS; col++)
+			img[row][col] = LUT[img[row][col]];
+}
+
+void Spoil_good_looking_Image(unsigned char img[][NUMBER_OF_COLUMNS])
+{
+	double c = 0.346;  //0.25+0.02*B+0.004*C =>ABCD=1440 ==>B=4,C=4
+	double b = 35; //21+2*F+G => EFGH=8546 ==> F=5,G=4
+	Create_LUT(LUT, c, b);
+	ApplyLUTonGrayImage(GrayImage, LUT);
+}
+
+void CreateMinMaxLUT(unsigned char LUT[], unsigned char min, unsigned max)
+{
+	double c = 255./ (max - min);
+	cout << "c" << c << endl;
+	double b = -c * min; //According to pixel-pixel operations , Dr.Kosolapov Samuel lecture [2]
+	Create_LUT(LUT, c, b);
+}
+
+void Min_Max_Algorithm(unsigned char img[][NUMBER_OF_COLUMNS])
+{
+	unsigned char min, max;
+	min = PIXEL_MAXVAL;
+	max = PIXEL_MINVAL;
+	for(int row=0;row<=NUMBER_OF_ROWS;row++)
+		for (int col = 0; col <= NUMBER_OF_COLUMNS; col++)
+		{
+			if (img[row][col] < min)
+				min = img[row][col];
+			if (img[row][col] > max)
+				max = img[row][col];
+		}
+	CreateMinMaxLUT(LUT, min, max);
+	cout << "max " << (int)max << endl;
+	cout << "min " << int(min) << endl;
+	cout << "pixel_maxval " << int(PIXEL_MAXVAL) << endl;
+	cout << "pixel minval " << int(PIXEL_MINVAL) << endl;
+	ApplyLUTonGrayImage(GrayImage, LUT);
+}
+
+
+
+void main()
+{
+	LoadGrayImageFromTrueColorBmpFile(GrayImage, "A20.bmp");
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A20gray.bmp");
+	Spoil_good_looking_Image(GrayImage);
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A211.bmp");
+	Min_Max_Algorithm(GrayImage);
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A212.bmp");
+
+	LoadGrayImageFromTrueColorBmpFile(GrayImage, "A201.bmp");
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A201gray.bmp");
+	Spoil_good_looking_Image(GrayImage);
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A2111.bmp");
+	Min_Max_Algorithm(GrayImage);
+	StoreGrayImageAsGrayBmpFile(GrayImage, "A2121.bmp");
+
+	WaitForUserPressKey();
+}
